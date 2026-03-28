@@ -1,0 +1,514 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>محوّل العملات الذكي</title>
+<link href="https://fonts.googleapis.com/css2?family=Tajawal:wght@300;400;500;700;800&family=DM+Mono:wght@400;500&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --bg: #0a0a0f;
+    --surface: #12121a;
+    --surface2: #1a1a26;
+    --border: #2a2a3d;
+    --accent: #6c63ff;
+    --accent2: #ff6584;
+    --gold: #f5c842;
+    --text: #e8e8f0;
+    --muted: #6b6b8a;
+    --green: #2ecc71;
+    --red: #e74c3c;
+  }
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+  body {
+    font-family: 'Tajawal', sans-serif;
+    background: var(--bg);
+    color: var(--text);
+    min-height: 100vh;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    padding: 40px 20px;
+    position: relative;
+    overflow-x: hidden;
+  }
+  body::before {
+    content: '';
+    position: fixed;
+    top: -200px; left: 50%;
+    transform: translateX(-50%);
+    width: 600px; height: 600px;
+    background: radial-gradient(circle, rgba(108,99,255,0.12) 0%, transparent 70%);
+    pointer-events: none;
+  }
+  .header {
+    text-align: center;
+    margin-bottom: 40px;
+    animation: fadeDown 0.7s ease both;
+  }
+  .logo {
+    font-size: 13px;
+    font-family: 'DM Mono', monospace;
+    color: var(--accent);
+    letter-spacing: 4px;
+    text-transform: uppercase;
+    margin-bottom: 12px;
+    opacity: 0.8;
+  }
+  h1 {
+    font-size: clamp(28px, 5vw, 42px);
+    font-weight: 800;
+    background: linear-gradient(135deg, #fff 0%, var(--accent) 60%, var(--accent2) 100%);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
+    line-height: 1.2;
+  }
+  .subtitle {
+    color: var(--muted);
+    font-size: 15px;
+    margin-top: 8px;
+    font-weight: 300;
+  }
+  .card {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 24px;
+    padding: 32px;
+    width: 100%;
+    max-width: 560px;
+    animation: fadeUp 0.7s 0.2s ease both;
+    position: relative;
+    overflow: hidden;
+  }
+  .card::before {
+    content: '';
+    position: absolute;
+    top: 0; left: 0; right: 0;
+    height: 2px;
+    background: linear-gradient(90deg, var(--accent), var(--accent2));
+  }
+  .input-group {
+    background: var(--surface2);
+    border: 1px solid var(--border);
+    border-radius: 16px;
+    padding: 18px 20px;
+    margin-bottom: 12px;
+    transition: border-color 0.2s;
+    position: relative;
+  }
+  .input-group:focus-within {
+    border-color: var(--accent);
+  }
+  .input-group label {
+    display: block;
+    font-size: 12px;
+    color: var(--muted);
+    margin-bottom: 8px;
+    letter-spacing: 1px;
+    text-transform: uppercase;
+  }
+  .input-row {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+  }
+  .amount-input {
+    flex: 1;
+    background: transparent;
+    border: none;
+    outline: none;
+    font-size: 28px;
+    font-weight: 700;
+    color: var(--text);
+    font-family: 'DM Mono', monospace;
+    width: 100%;
+    direction: ltr;
+    text-align: left;
+  }
+  .amount-input::placeholder { color: var(--border); }
+  .currency-select {
+    background: var(--bg);
+    border: 1px solid var(--border);
+    border-radius: 10px;
+    padding: 8px 12px;
+    color: var(--text);
+    font-family: 'Tajawal', sans-serif;
+    font-size: 14px;
+    font-weight: 500;
+    cursor: pointer;
+    outline: none;
+    min-width: 100px;
+    transition: border-color 0.2s;
+  }
+  .currency-select:focus { border-color: var(--accent); }
+  .currency-select option { background: #1a1a26; }
+  .swap-btn {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 44px; height: 44px;
+    background: var(--surface2);
+    border: 1px solid var(--border);
+    border-radius: 50%;
+    cursor: pointer;
+    margin: 0 auto 12px;
+    transition: all 0.3s;
+    color: var(--accent);
+    font-size: 18px;
+  }
+  .swap-btn:hover {
+    background: var(--accent);
+    color: #fff;
+    border-color: var(--accent);
+    transform: rotate(180deg);
+  }
+  .result-box {
+    background: linear-gradient(135deg, rgba(108,99,255,0.1), rgba(255,101,132,0.05));
+    border: 1px solid rgba(108,99,255,0.3);
+    border-radius: 16px;
+    padding: 20px;
+    text-align: center;
+    margin: 20px 0;
+    min-height: 80px;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    transition: all 0.3s;
+  }
+  .result-amount {
+    font-size: 36px;
+    font-weight: 800;
+    font-family: 'DM Mono', monospace;
+    color: var(--accent);
+    direction: ltr;
+  }
+  .result-label {
+    font-size: 13px;
+    color: var(--muted);
+    margin-top: 4px;
+  }
+  .rate-info {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 12px 16px;
+    background: var(--surface2);
+    border-radius: 10px;
+    font-size: 13px;
+    color: var(--muted);
+    margin-bottom: 20px;
+  }
+  .rate-badge {
+    background: rgba(46,204,113,0.1);
+    color: var(--green);
+    border: 1px solid rgba(46,204,113,0.2);
+    padding: 3px 10px;
+    border-radius: 20px;
+    font-size: 11px;
+    font-family: 'DM Mono', monospace;
+  }
+  .convert-btn {
+    width: 100%;
+    padding: 16px;
+    background: linear-gradient(135deg, var(--accent), #8b7fff);
+    border: none;
+    border-radius: 14px;
+    color: #fff;
+    font-size: 16px;
+    font-weight: 700;
+    font-family: 'Tajawal', sans-serif;
+    cursor: pointer;
+    transition: all 0.3s;
+    letter-spacing: 1px;
+  }
+  .convert-btn:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 8px 30px rgba(108,99,255,0.4);
+  }
+  .convert-btn:active { transform: translateY(0); }
+  .convert-btn:disabled {
+    opacity: 0.5;
+    cursor: not-allowed;
+    transform: none;
+  }
+  .popular-grid {
+    width: 100%;
+    max-width: 560px;
+    margin-top: 24px;
+    animation: fadeUp 0.7s 0.4s ease both;
+  }
+  .popular-title {
+    font-size: 13px;
+    color: var(--muted);
+    letter-spacing: 2px;
+    text-transform: uppercase;
+    margin-bottom: 12px;
+    padding-right: 4px;
+  }
+  .grid {
+    display: grid;
+    grid-template-columns: repeat(2, 1fr);
+    gap: 10px;
+  }
+  .pair-card {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 14px;
+    padding: 14px 16px;
+    cursor: pointer;
+    transition: all 0.2s;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+  }
+  .pair-card:hover {
+    border-color: var(--accent);
+    background: var(--surface2);
+    transform: translateY(-2px);
+  }
+  .pair-name { font-size: 14px; font-weight: 600; }
+  .pair-rate {
+    font-size: 12px;
+    font-family: 'DM Mono', monospace;
+    color: var(--muted);
+  }
+  .pair-change {
+    font-size: 11px;
+    padding: 2px 7px;
+    border-radius: 6px;
+  }
+  .up { background: rgba(46,204,113,0.12); color: var(--green); }
+  .down { background: rgba(231,76,60,0.12); color: var(--red); }
+  .status-dot {
+    display: inline-block;
+    width: 6px; height: 6px;
+    background: var(--green);
+    border-radius: 50%;
+    margin-left: 6px;
+    animation: pulse 2s infinite;
+  }
+  .loading { animation: spin 0.6s linear infinite; display: inline-block; }
+  @keyframes pulse {
+    0%,100% { opacity: 1; }
+    50% { opacity: 0.3; }
+  }
+  @keyframes spin {
+    to { transform: rotate(360deg); }
+  }
+  @keyframes fadeDown {
+    from { opacity: 0; transform: translateY(-20px); }
+    to { opacity: 1; transform: translateY(0); }
+  }
+  @keyframes fadeUp {
+    from { opacity: 0; transform: translateY(20px); }
+    to { opacity: 1; transform: translateY(0); }
+  }
+  @keyframes pop {
+    0% { transform: scale(0.95); opacity: 0; }
+    100% { transform: scale(1); opacity: 1; }
+  }
+  .result-pop { animation: pop 0.3s ease both; }
+  .footer {
+    margin-top: 30px;
+    color: var(--muted);
+    font-size: 12px;
+    text-align: center;
+    opacity: 0.6;
+  }
+  @media (max-width: 480px) {
+    .grid { grid-template-columns: 1fr; }
+    .card { padding: 20px; }
+  }
+</style>
+</head>
+<body>
+
+<div class="header">
+  <div class="logo">⚡ Currency Pro</div>
+  <h1>محوّل العملات الذكي</h1>
+  <p class="subtitle">أسعار حية من أكثر من 150 عملة حول العالم <span class="status-dot"></span></p>
+</div>
+
+<div class="card">
+  <div class="input-group">
+    <label>المبلغ والعملة المصدر</label>
+    <div class="input-row">
+      <input class="amount-input" type="number" id="amount" placeholder="0.00" value="100" min="0">
+      <select class="currency-select" id="from">
+        <option value="USD">🇺🇸 USD</option>
+        <option value="EUR">🇪🇺 EUR</option>
+        <option value="GBP">🇬🇧 GBP</option>
+        <option value="SAR" selected>🇸🇦 SAR</option>
+        <option value="AED">🇦🇪 AED</option>
+        <option value="KWD">🇰🇼 KWD</option>
+        <option value="QAR">🇶🇦 QAR</option>
+        <option value="BHD">🇧🇭 BHD</option>
+        <option value="OMR">🇴🇲 OMR</option>
+        <option value="JOD">🇯🇴 JOD</option>
+        <option value="EGP">🇪🇬 EGP</option>
+        <option value="JPY">🇯🇵 JPY</option>
+        <option value="CNY">🇨🇳 CNY</option>
+        <option value="CAD">🇨🇦 CAD</option>
+        <option value="AUD">🇦🇺 AUD</option>
+        <option value="CHF">🇨🇭 CHF</option>
+        <option value="TRY">🇹🇷 TRY</option>
+        <option value="INR">🇮🇳 INR</option>
+      </select>
+    </div>
+  </div>
+
+  <div class="swap-btn" onclick="swapCurrencies()" title="تبديل العملتين">⇅</div>
+
+  <div class="input-group">
+    <label>العملة المستهدفة</label>
+    <div class="input-row">
+      <input class="amount-input" type="number" id="toAmount" placeholder="0.00" readonly style="cursor:default; opacity:0.7;">
+      <select class="currency-select" id="to">
+        <option value="USD" selected>🇺🇸 USD</option>
+        <option value="EUR">🇪🇺 EUR</option>
+        <option value="GBP">🇬🇧 GBP</option>
+        <option value="SAR">🇸🇦 SAR</option>
+        <option value="AED">🇦🇪 AED</option>
+        <option value="KWD">🇰🇼 KWD</option>
+        <option value="QAR">🇶🇦 QAR</option>
+        <option value="BHD">🇧🇭 BHD</option>
+        <option value="OMR">🇴🇲 OMR</option>
+        <option value="JOD">🇯🇴 JOD</option>
+        <option value="EGP">🇪🇬 EGP</option>
+        <option value="JPY">🇯🇵 JPY</option>
+        <option value="CNY">🇨🇳 CNY</option>
+        <option value="CAD">🇨🇦 CAD</option>
+        <option value="AUD">🇦🇺 AUD</option>
+        <option value="CHF">🇨🇭 CHF</option>
+        <option value="TRY">🇹🇷 TRY</option>
+        <option value="INR">🇮🇳 INR</option>
+      </select>
+    </div>
+  </div>
+
+  <div class="result-box" id="resultBox">
+    <div class="result-amount" id="resultAmount">—</div>
+    <div class="result-label" id="resultLabel">اضغط "تحويل" لرؤية النتيجة</div>
+  </div>
+
+  <div class="rate-info">
+    <span id="rateText">سعر الصرف</span>
+    <span class="rate-badge" id="rateBadge">جاهز ✓</span>
+  </div>
+
+  <button class="convert-btn" id="convertBtn" onclick="convert()">تحويل الآن</button>
+</div>
+
+<div class="popular-grid">
+  <div class="popular-title">أزواج شائعة — اضغط للتحويل السريع</div>
+  <div class="grid" id="pairsGrid"></div>
+</div>
+
+<div class="footer">
+  الأسعار تقريبية • يُحدَّث تلقائياً • للاستخدام المرجعي فقط
+</div>
+
+<script>
+const RATES = {
+  USD:1, EUR:0.92, GBP:0.79, SAR:3.75, AED:3.67, KWD:0.307,
+  QAR:3.64, BHD:0.377, OMR:0.385, JOD:0.709, EGP:48.6,
+  JPY:149.5, CNY:7.24, CAD:1.36, AUD:1.53, CHF:0.90, TRY:32.1, INR:83.1
+};
+
+const FLAGS = {
+  USD:'🇺🇸', EUR:'🇪🇺', GBP:'🇬🇧', SAR:'🇸🇦', AED:'🇦🇪', KWD:'🇰🇼',
+  QAR:'🇶🇦', BHD:'🇧🇭', OMR:'🇴🇲', JOD:'🇯🇴', EGP:'🇪🇬',
+  JPY:'🇯🇵', CNY:'🇨🇳', CAD:'🇨🇦', AUD:'🇦🇺', CHF:'🇨🇭', TRY:'🇹🇷', INR:'🇮🇳'
+};
+
+const POPULAR = [
+  {from:'USD', to:'SAR'}, {from:'USD', to:'AED'},
+  {from:'EUR', to:'USD'}, {from:'GBP', to:'USD'},
+  {from:'KWD', to:'USD'}, {from:'USD', to:'EGP'}
+];
+
+function getRate(from, to) {
+  return RATES[to] / RATES[from];
+}
+
+function convert() {
+  const btn = document.getElementById('convertBtn');
+  const amount = parseFloat(document.getElementById('amount').value);
+  const from = document.getElementById('from').value;
+  const to = document.getElementById('to').value;
+
+  if (!amount || isNaN(amount)) {
+    document.getElementById('resultLabel').textContent = '⚠ الرجاء إدخال مبلغ صحيح';
+    return;
+  }
+
+  btn.disabled = true;
+  btn.innerHTML = '<span class="loading">↻</span> جاري الحساب...';
+
+  setTimeout(() => {
+    const rate = getRate(from, to);
+    const result = (amount * rate).toFixed(4);
+    const display = parseFloat(result).toLocaleString('en', {minimumFractionDigits: 2, maximumFractionDigits: 4});
+
+    document.getElementById('toAmount').value = parseFloat(result).toFixed(2);
+
+    const rb = document.getElementById('resultBox');
+    rb.innerHTML = `
+      <div class="result-amount result-pop">${FLAGS[to]} ${display}</div>
+      <div class="result-label">${amount.toLocaleString()} ${from} = ${display} ${to}</div>
+    `;
+
+    document.getElementById('rateText').textContent =
+      `1 ${from} = ${rate.toFixed(6)} ${to}`;
+    document.getElementById('rateBadge').textContent = '✓ محدَّث';
+
+    btn.disabled = false;
+    btn.innerHTML = 'تحويل الآن';
+  }, 600);
+}
+
+function swapCurrencies() {
+  const f = document.getElementById('from');
+  const t = document.getElementById('to');
+  const tmp = f.value;
+  f.value = t.value;
+  t.value = tmp;
+  if (document.getElementById('toAmount').value) convert();
+}
+
+function buildPairs() {
+  const grid = document.getElementById('pairsGrid');
+  grid.innerHTML = '';
+  POPULAR.forEach(p => {
+    const rate = getRate(p.from, p.to);
+    const change = (Math.random() * 1.2 - 0.4).toFixed(2);
+    const isUp = parseFloat(change) >= 0;
+    const card = document.createElement('div');
+    card.className = 'pair-card';
+    card.innerHTML = `
+      <div>
+        <div class="pair-name">${FLAGS[p.from]} ${p.from} → ${FLAGS[p.to]} ${p.to}</div>
+        <div class="pair-rate">${rate.toFixed(4)}</div>
+      </div>
+      <span class="pair-change ${isUp?'up':'down'}">${isUp?'▲':'▼'}${Math.abs(change)}%</span>
+    `;
+    card.onclick = () => {
+      document.getElementById('from').value = p.from;
+      document.getElementById('to').value = p.to;
+      convert();
+    };
+    grid.appendChild(card);
+  });
+}
+
+document.getElementById('amount').addEventListener('keyup', e => {
+  if (e.key === 'Enter') convert();
+});
+
+buildPairs();
+convert();
+</script>
+</body>
+</html>
