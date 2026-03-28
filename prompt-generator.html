@@ -1,0 +1,424 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>مولّد Prompts الذكي</title>
+<link href="https://fonts.googleapis.com/css2?family=Tajawal:wght@300;400;500;700;800&family=DM+Mono:wght@400;500&display=swap" rel="stylesheet">
+<style>
+:root {
+  --bg: #07070e;
+  --s1: #0f0f1a;
+  --s2: #161625;
+  --border: #252538;
+  --accent: #c084fc;
+  --accent2: #38bdf8;
+  --gold: #fbbf24;
+  --text: #e2e2f0;
+  --muted: #6b6b8a;
+  --green: #34d399;
+}
+*{margin:0;padding:0;box-sizing:border-box;}
+body{
+  font-family:'Tajawal',sans-serif;
+  background:var(--bg);
+  color:var(--text);
+  min-height:100vh;
+  padding:36px 20px 60px;
+}
+body::before{
+  content:'';
+  position:fixed;
+  top:-100px;right:-100px;
+  width:500px;height:500px;
+  background:radial-gradient(circle,rgba(192,132,252,0.08) 0%,transparent 70%);
+  pointer-events:none;
+}
+body::after{
+  content:'';
+  position:fixed;
+  bottom:-100px;left:-100px;
+  width:400px;height:400px;
+  background:radial-gradient(circle,rgba(56,189,248,0.06) 0%,transparent 70%);
+  pointer-events:none;
+}
+.wrap{max-width:860px;margin:0 auto;}
+/* HEADER */
+.header{text-align:center;margin-bottom:40px;animation:fadeDown .6s ease both;}
+.badge{
+  display:inline-flex;align-items:center;gap:6px;
+  background:rgba(192,132,252,0.1);
+  border:1px solid rgba(192,132,252,0.25);
+  border-radius:20px;padding:5px 14px;
+  font-size:12px;color:var(--accent);
+  letter-spacing:2px;margin-bottom:14px;
+}
+.badge span{width:6px;height:6px;background:var(--accent);border-radius:50%;animation:pulse 2s infinite;}
+h1{font-size:clamp(26px,5vw,44px);font-weight:800;line-height:1.2;
+  background:linear-gradient(135deg,#fff 0%,var(--accent) 50%,var(--accent2) 100%);
+  -webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text;}
+.sub{color:var(--muted);font-size:14px;margin-top:8px;font-weight:300;}
+/* GRID LAYOUT */
+.layout{display:grid;grid-template-columns:1fr 1fr;gap:16px;margin-bottom:16px;}
+@media(max-width:640px){.layout{grid-template-columns:1fr;}}
+/* CARD */
+.card{
+  background:var(--s1);border:1px solid var(--border);
+  border-radius:18px;padding:20px;
+}
+.card-title{font-size:12px;letter-spacing:2px;text-transform:uppercase;color:var(--muted);margin-bottom:14px;}
+/* TAGS */
+.tags{display:flex;flex-wrap:wrap;gap:6px;}
+.tag{
+  background:var(--s2);border:1px solid var(--border);
+  border-radius:8px;padding:6px 12px;font-size:13px;
+  cursor:pointer;transition:all .2s;user-select:none;color:var(--text);
+}
+.tag:hover{border-color:var(--accent);color:var(--accent);}
+.tag.active{background:rgba(192,132,252,0.15);border-color:var(--accent);color:var(--accent);}
+.tag.active-blue{background:rgba(56,189,248,0.12);border-color:var(--accent2);color:var(--accent2);}
+.tag.active-gold{background:rgba(251,191,36,0.12);border-color:var(--gold);color:var(--gold);}
+.tag.active-green{background:rgba(52,211,153,0.12);border-color:var(--green);color:var(--green);}
+/* SUBJECT INPUT */
+.subject-card{background:var(--s1);border:1px solid var(--border);border-radius:18px;padding:20px;margin-bottom:16px;}
+.subject-row{display:flex;gap:10px;align-items:center;}
+.subject-input{
+  flex:1;background:var(--s2);border:1px solid var(--border);
+  border-radius:12px;padding:14px 16px;color:var(--text);
+  font-family:'Tajawal',sans-serif;font-size:15px;outline:none;
+  transition:border-color .2s;
+}
+.subject-input:focus{border-color:var(--accent);}
+.subject-input::placeholder{color:var(--muted);}
+/* SLIDERS */
+.sliders-card{background:var(--s1);border:1px solid var(--border);border-radius:18px;padding:20px;margin-bottom:16px;}
+.slider-row{margin-bottom:16px;}
+.slider-row:last-child{margin-bottom:0;}
+.slider-label{display:flex;justify-content:space-between;font-size:13px;margin-bottom:8px;}
+.slider-label span:first-child{color:var(--muted);}
+.slider-label span:last-child{color:var(--accent);font-family:'DM Mono',monospace;}
+input[type=range]{
+  width:100%;height:4px;-webkit-appearance:none;
+  background:var(--border);border-radius:2px;outline:none;cursor:pointer;
+}
+input[type=range]::-webkit-slider-thumb{
+  -webkit-appearance:none;width:16px;height:16px;
+  background:var(--accent);border-radius:50%;cursor:pointer;
+  box-shadow:0 0 8px rgba(192,132,252,0.4);
+}
+/* GENERATE BTN */
+.gen-btn{
+  width:100%;padding:18px;
+  background:linear-gradient(135deg,var(--accent),#818cf8);
+  border:none;border-radius:14px;color:#fff;
+  font-size:16px;font-weight:700;font-family:'Tajawal',sans-serif;
+  cursor:pointer;transition:all .3s;margin-bottom:20px;letter-spacing:1px;
+}
+.gen-btn:hover{transform:translateY(-2px);box-shadow:0 10px 40px rgba(192,132,252,0.35);}
+.gen-btn:active{transform:translateY(0);}
+.gen-btn:disabled{opacity:.5;cursor:not-allowed;transform:none;}
+/* OUTPUT */
+.output-card{
+  background:var(--s1);border:1px solid var(--border);
+  border-radius:18px;padding:24px;display:none;
+  animation:fadeUp .4s ease both;
+}
+.output-card.show{display:block;}
+.output-header{display:flex;justify-content:space-between;align-items:center;margin-bottom:16px;}
+.output-title{font-size:13px;letter-spacing:2px;text-transform:uppercase;color:var(--muted);}
+.output-actions{display:flex;gap:8px;}
+.action-btn{
+  background:var(--s2);border:1px solid var(--border);
+  border-radius:8px;padding:6px 14px;font-size:12px;
+  color:var(--text);cursor:pointer;transition:all .2s;
+  font-family:'Tajawal',sans-serif;
+}
+.action-btn:hover{border-color:var(--accent);color:var(--accent);}
+.prompt-tabs{display:flex;gap:6px;margin-bottom:14px;}
+.ptab{
+  padding:6px 14px;border-radius:8px;font-size:12px;
+  cursor:pointer;border:1px solid var(--border);
+  background:transparent;color:var(--muted);transition:all .2s;
+  font-family:'Tajawal',sans-serif;
+}
+.ptab.active{background:rgba(192,132,252,0.15);border-color:var(--accent);color:var(--accent);}
+.prompt-box{
+  background:var(--s2);border:1px solid var(--border);
+  border-radius:12px;padding:16px;
+  font-family:'DM Mono',monospace;font-size:13px;
+  line-height:1.7;color:var(--text);
+  min-height:100px;direction:ltr;text-align:left;
+  white-space:pre-wrap;word-break:break-word;
+}
+.prompt-box .kw{color:var(--accent);}
+.prompt-box .style{color:var(--accent2);}
+.prompt-box .qual{color:var(--gold);}
+.copy-toast{
+  position:fixed;bottom:30px;left:50%;transform:translateX(-50%);
+  background:var(--green);color:#000;font-weight:700;
+  padding:10px 24px;border-radius:30px;font-size:14px;
+  opacity:0;pointer-events:none;transition:opacity .3s;z-index:999;
+  font-family:'Tajawal',sans-serif;
+}
+.copy-toast.show{opacity:1;}
+.neg-box{
+  background:rgba(239,68,68,0.05);border:1px solid rgba(239,68,68,0.15);
+  border-radius:12px;padding:14px 16px;margin-top:12px;
+  font-family:'DM Mono',monospace;font-size:12px;
+  color:#f87171;direction:ltr;text-align:left;
+}
+@keyframes fadeDown{from{opacity:0;transform:translateY(-16px)}to{opacity:1;transform:translateY(0)}}
+@keyframes fadeUp{from{opacity:0;transform:translateY(16px)}to{opacity:1;transform:translateY(0)}}
+@keyframes pulse{0%,100%{opacity:1}50%{opacity:.3}}
+@keyframes typewriter{from{width:0}to{width:100%}}
+</style>
+</head>
+<body>
+<div class="wrap">
+
+<div class="header">
+  <div class="badge"><span></span> AI PROMPT GENERATOR</div>
+  <h1>مولّد Prompts الاحترافي</h1>
+  <p class="sub">اكتب فكرتك باللغة العربية — يولّد لك prompt جاهز لـ Midjourney و ChatGPT و Stable Diffusion</p>
+</div>
+
+<!-- SUBJECT -->
+<div class="subject-card">
+  <div class="card-title">✦ الموضوع الرئيسي</div>
+  <div class="subject-row">
+    <input class="subject-input" id="subject" type="text" placeholder="مثال: رجل يجلس في مقهى باريسي ليلاً، قطة فضائية على القمر، مدينة مستقبلية تحت الماء...">
+  </div>
+</div>
+
+<div class="layout">
+  <!-- STYLE -->
+  <div class="card">
+    <div class="card-title">🎨 الأسلوب الفني</div>
+    <div class="tags" id="styleTags">
+      <span class="tag" data-val="photorealistic">فوتوريالستك</span>
+      <span class="tag" data-val="cinematic film">سينمائي</span>
+      <span class="tag" data-val="digital art">فن رقمي</span>
+      <span class="tag" data-val="oil painting">لوحة زيتية</span>
+      <span class="tag" data-val="anime style">أنمي</span>
+      <span class="tag" data-val="watercolor">ألوان مائية</span>
+      <span class="tag" data-val="concept art">كونسبت آرت</span>
+      <span class="tag" data-val="3D render">ثري دي</span>
+      <span class="tag" data-val="vintage photography">تصوير كلاسيكي</span>
+      <span class="tag" data-val="minimalist illustration">رسم مينيمال</span>
+    </div>
+  </div>
+
+  <!-- MOOD -->
+  <div class="card">
+    <div class="card-title">🌙 الحالة المزاجية</div>
+    <div class="tags" id="moodTags">
+      <span class="tag" data-val="dramatic moody">درامي</span>
+      <span class="tag" data-val="warm cozy">دافئ ومريح</span>
+      <span class="tag" data-val="dark mysterious">داكن وغامض</span>
+      <span class="tag" data-val="vibrant colorful">نابض بالألوان</span>
+      <span class="tag" data-val="peaceful serene">هادئ</span>
+      <span class="tag" data-val="epic grand">ملحمي</span>
+      <span class="tag" data-val="melancholic">حزين رومانسي</span>
+      <span class="tag" data-val="futuristic neon">مستقبلي نيون</span>
+    </div>
+  </div>
+
+  <!-- LIGHTING -->
+  <div class="card">
+    <div class="card-title">💡 الإضاءة</div>
+    <div class="tags" id="lightTags">
+      <span class="tag" data-val="golden hour sunlight">ضوء الغروب الذهبي</span>
+      <span class="tag" data-val="dramatic studio lighting">ستوديو درامي</span>
+      <span class="tag" data-val="neon lights">إضاءة نيون</span>
+      <span class="tag" data-val="soft natural light">ضوء طبيعي ناعم</span>
+      <span class="tag" data-val="moonlight">ضوء القمر</span>
+      <span class="tag" data-val="rim lighting">إضاءة خلفية</span>
+      <span class="tag" data-val="volumetric fog light">ضباب درامي</span>
+    </div>
+  </div>
+
+  <!-- CAMERA -->
+  <div class="card">
+    <div class="card-title">📷 زاوية الكاميرا</div>
+    <div class="tags" id="camTags">
+      <span class="tag" data-val="close-up portrait">كلوز آب</span>
+      <span class="tag" data-val="wide angle shot">زاوية واسعة</span>
+      <span class="tag" data-val="aerial drone view">طائرة مسيّرة</span>
+      <span class="tag" data-val="low angle heroic">زاوية منخفضة بطولية</span>
+      <span class="tag" data-val="macro photography">ماكرو تفصيلي</span>
+      <span class="tag" data-val="dutch angle">زاوية مائلة</span>
+      <span class="tag" data-val="eye level">مستوى العين</span>
+    </div>
+  </div>
+</div>
+
+<!-- SLIDERS -->
+<div class="sliders-card">
+  <div class="card-title">⚙ ضبط الجودة</div>
+  <div class="slider-row">
+    <div class="slider-label"><span>جودة التفاصيل</span><span id="detailVal">8K Ultra</span></div>
+    <input type="range" id="detail" min="1" max="5" value="4" oninput="updateSliders()">
+  </div>
+  <div class="slider-row">
+    <div class="slider-label"><span>الإبداع والخيال</span><span id="creativeVal">متوازن</span></div>
+    <input type="range" id="creative" min="1" max="5" value="3" oninput="updateSliders()">
+  </div>
+</div>
+
+<button class="gen-btn" id="genBtn" onclick="generate()">✦ توليد الـ Prompt الآن</button>
+
+<!-- OUTPUT -->
+<div class="output-card" id="output">
+  <div class="output-header">
+    <div class="output-title">✦ الـ Prompt الجاهز</div>
+    <div class="output-actions">
+      <button class="action-btn" onclick="generate()">↻ إعادة توليد</button>
+      <button class="action-btn" onclick="copyPrompt()">نسخ ✓</button>
+    </div>
+  </div>
+  <div class="prompt-tabs">
+    <button class="ptab active" onclick="switchTab(this,'mj')">Midjourney</button>
+    <button class="ptab" onclick="switchTab(this,'sd')">Stable Diffusion</button>
+    <button class="ptab" onclick="switchTab(this,'gpt')">ChatGPT / DALL-E</button>
+  </div>
+  <div class="prompt-box" id="promptText"></div>
+  <div class="neg-box" id="negText"></div>
+</div>
+
+</div>
+<div class="copy-toast" id="toast">تم النسخ! ✓</div>
+
+<script>
+const detailLabels = ['منخفض','عادي','جيد','8K Ultra','فائق الدقة'];
+const creativeLabels = ['واقعي جداً','واقعي','متوازن','خيالي','خيال جامح'];
+
+function updateSliders(){
+  document.getElementById('detailVal').textContent = detailLabels[document.getElementById('detail').value-1];
+  document.getElementById('creativeVal').textContent = creativeLabels[document.getElementById('creative').value-1];
+}
+
+// Tag selection
+const tagGroups = {styleTags:'blue', moodTags:'purple', lightTags:'gold', camTags:'green'};
+const colorMap = {blue:'active-blue', purple:'active', gold:'active-gold', green:'active-green'};
+const selected = {style:null, mood:null, light:null, cam:null};
+const keyMap = {styleTags:'style', moodTags:'mood', lightTags:'light', camTags:'cam'};
+
+document.querySelectorAll('.tag').forEach(tag => {
+  tag.addEventListener('click', function(){
+    const group = this.closest('.tags');
+    const gid = group.id;
+    const key = keyMap[gid];
+    const color = colorMap[tagGroups[gid]];
+    group.querySelectorAll('.tag').forEach(t => t.classList.remove('active','active-blue','active-gold','active-green'));
+    if(selected[key] === this.dataset.val){
+      selected[key] = null;
+    } else {
+      this.classList.add(color);
+      selected[key] = this.dataset.val;
+    }
+  });
+});
+
+const qualityMap = [
+  '',
+  'low quality',
+  'standard quality',
+  'high quality, detailed',
+  '8K resolution, ultra detailed, sharp focus, professional photography',
+  'ultra-high resolution, hyper detailed, masterpiece quality, award winning, 16K'
+];
+
+const creativeMap = [
+  '',
+  'realistic, accurate, true to life',
+  'slightly stylized, realistic',
+  'balanced artistic interpretation',
+  'highly stylized, imaginative, surreal elements',
+  'extremely creative, fantastical, dreamlike, surreal, mind-bending'
+];
+
+const negMap = [
+  'low quality, blurry',
+  'ugly, deformed, blurry, low resolution',
+  'blurry, low quality, distorted, deformed',
+  'blurry, low quality, distorted, deformed, ugly, bad anatomy, watermark, signature',
+  'blurry, low quality, distorted, deformed, ugly, bad anatomy, bad proportions, extra limbs, cloned face, disfigured, watermark, signature, text',
+  'ugly, tiling, poorly drawn hands, poorly drawn feet, poorly drawn face, out of frame, extra limbs, disfigured, deformed, body out of frame, bad anatomy, watermark, signature, cut off, low contrast, underexposed, overexposed, bad art, beginner, amateur'
+];
+
+let prompts = {mj:'', sd:'', gpt:''};
+let activeTab = 'mj';
+
+function buildBase(){
+  const subj = document.getElementById('subject').value.trim();
+  if(!subj) return null;
+
+  const style = selected.style || 'photorealistic';
+  const mood = selected.mood || 'cinematic';
+  const light = selected.light || 'natural lighting';
+  const cam = selected.cam || '';
+  const qual = qualityMap[document.getElementById('detail').value];
+  const cre = creativeMap[document.getElementById('creative').value];
+
+  return {subj, style, mood, light, cam, qual, cre};
+}
+
+function generate(){
+  const b = buildBase();
+  if(!b){
+    document.getElementById('subject').focus();
+    document.getElementById('subject').style.borderColor = '#ef4444';
+    setTimeout(()=>document.getElementById('subject').style.borderColor='',1500);
+    return;
+  }
+
+  const btn = document.getElementById('genBtn');
+  btn.disabled = true;
+  btn.textContent = '✦ جاري التوليد...';
+
+  setTimeout(()=>{
+    const extras = ['intricate details','masterpiece','trending on artstation','highly detailed','professional','award winning photography'].slice(0,2+Math.floor(Math.random()*3));
+
+    prompts.mj = `${b.subj}, ${b.style}, ${b.mood}, ${b.light}${b.cam?', '+b.cam:''}, ${b.qual}, ${b.cre}, ${extras.join(', ')} --ar 16:9 --v 6 --q 2 --s 750`;
+
+    prompts.sd = `(${b.style}:1.4), (${b.mood}:1.2), ${b.subj}, ${b.light}${b.cam?', '+b.cam:''}, (${b.qual}:1.3), ${b.cre}, ${extras.join(', ')}, best quality, masterpiece`;
+
+    prompts.gpt = `Create a ${b.style} image of: ${b.subj}. Style: ${b.style}. Mood: ${b.mood}. Lighting: ${b.light}${b.cam?'. Camera angle: '+b.cam:''}. Quality: ${b.qual}. Artistic direction: ${b.cre}.`;
+
+    const negIdx = document.getElementById('detail').value;
+    document.getElementById('negText').textContent = '⊖ Negative prompt: ' + negMap[negIdx];
+
+    showPrompt();
+    document.getElementById('output').classList.add('show');
+    document.getElementById('output').scrollIntoView({behavior:'smooth', block:'nearest'});
+
+    btn.disabled = false;
+    btn.textContent = '✦ توليد الـ Prompt الآن';
+  }, 700);
+}
+
+function showPrompt(){
+  document.getElementById('promptText').textContent = prompts[activeTab];
+}
+
+function switchTab(el, tab){
+  document.querySelectorAll('.ptab').forEach(t=>t.classList.remove('active'));
+  el.classList.add('active');
+  activeTab = tab;
+  showPrompt();
+}
+
+function copyPrompt(){
+  const text = prompts[activeTab];
+  if(!text) return;
+  navigator.clipboard.writeText(text).then(()=>{
+    const t = document.getElementById('toast');
+    t.classList.add('show');
+    setTimeout(()=>t.classList.remove('show'), 2000);
+  });
+}
+
+updateSliders();
+</script>
+</body>
+</html>
